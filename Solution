@@ -1,0 +1,54 @@
+
+**HUE Connection Error Resolution**
+**Step-by-Step Guide:**
+
+1. **Check Initial Error:**
+   ```
+   Could not connect to hive-server:10000 (code THRIFTTRANSPORT): TTransportException(u'Could not connect to hive-server:10000',)
+   ```
+
+2. **Verify HDFS Permissions:**
+   - Start by running:
+     ```
+     docker-compose up
+     ```
+   - Access the namenode container:
+     ```
+     docker exec -it ds-m4-hue_hive-namenode-1 bash
+     ```
+   - Verify and correct HDFS permissions:
+     - Verification:
+       ```
+       hdfs dfs -stat "%u %g" /
+       ```
+     - If owner and group are not hdfs:hdfs, proceed with correction.
+     - Correction:
+       ```
+       hdfs dfs -chown hdfs:hdfs /
+       ```
+     - Verify again:
+       ```
+       hdfs dfs -stat "%u %g" /
+       exit
+       ```
+
+3. **Repeat for Datanodes and Other HDFS-Related Services:**
+   - Repeat the above steps for datanode containers and other services related to HDFS, such as datanode, resourcemanager, hive-server, hive-metastore, etc.
+
+4. **Skip Verification on Non-HDFS Related Containers:**
+   - Avoid running HDFS commands on containers not related to HDFS, such as huedb, hive-metastore-postgresql, hue.
+
+5. **Stop and Restart Services:**
+   - Stop the services:
+     ```
+     docker-compose down
+     ```
+   - Start the services:
+     ```
+     docker-compose up -d
+     ```
+
+6. **Check Service Status:**
+   - Use `docker ps` to ensure containers are in the "Up" state.
+
+By following these steps, you should have addressed the permission issues related to Hadoop services and should have your environment functioning properly.
